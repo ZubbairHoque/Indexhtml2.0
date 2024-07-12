@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<style>
+.paragraph {
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-family: Helvetica;
+    background-color: #d3d3d3;
+}
+.header {
+    margin: 0;
+    width: 100%;
+    height: 45px;
+    background: linear-gradient(45deg, #A9A9A9, black);
+    font-size: 24px;
+    text-align: left;
+    line-height: 45px;
+    box-sizing: border-box;
+    color: white;
+}
+.main {
+    text-align: center;
+    padding: 20px;
+}
+input[type="text"] {
+    font-size: 24px;
+    padding: 5px;
+    height: 35px;
+    width: calc(80% - 20px); /* Adjusted width with a 10px margin on both sides */
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    box-sizing: border-box;
+    margin-left: 10px; /* Added margin to the left side */
+}
+button {
+    height: 35px; /* Matches the height of the input box plus padding and border */
+    font-size: 24px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-left: none;
+    background-color: #f0f0f0;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    transition: box-shadow 0.2s ease;
+}
+button:active {
+    box-shadow: 0 0 10px #2196F3;
+}
+.sh {
+    font-size: 24px;
+}
+.task {
+    background-color: #d3d3d3;
+    padding: 5px;
+    margin: 5px 0;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.delete-btn {
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+</style>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>To do list - web applications</title>
+</head>
+<body>
+    <main class="container" id="container">
+        <header class="header">&nbsp;To Do list</header>
+        <h1 class="sh">&nbsp;Make a list:</h1>
+        <input id="input" type="text"><button id="button">Add</button>
+        <div id="js"></div>
+        <div id="error-message" class="error-message"></div> <!-- Error message container -->
+    </main>
+<script>
+let btn = document.getElementById("button");
+let field = document.getElementById("input");
+let div = document.getElementById("js");
+let errorMessage = document.getElementById("error-message");
+
+btn.addEventListener("click", function() {
+    errorMessage.innerText = "";
+
+    if (field.value.trim() === "") {
+        errorMessage.innerText = "Please enter a task name.";
+        return;
+    }
+
+    let taskExists = Array.from(div.children).some(function(taskDiv) {
+        let taskText = taskDiv.querySelector("span").innerText;
+        return taskText === field.value.trim();
+    });
+
+    if (taskExists) {
+        if (confirm("Task already exists. Do you want to add it anyway?")) {
+            addTask(field.value.trim());
+        } else {
+            field.value = "";
+        }
+    } else {
+        addTask(field.value.trim());
+    }
+});
+
+function addTask(task) {
+    var taskDiv = document.createElement("div");
+    taskDiv.classList.add("task");
+
+    var taskText = document.createElement("span");
+    taskText.innerText = task;
+
+    var deleteBtn = document.createElement("button");
+    deleteBtn.innerText = "x";
+    deleteBtn.classList.add("delete-btn");
+
+    deleteBtn.addEventListener("click", function() {
+        div.removeChild(taskDiv);
+        saveTasks();
+    });
+
+    taskDiv.appendChild(taskText);
+    taskDiv.appendChild(deleteBtn);
+    div.appendChild(taskDiv);
+
+    field.value = "";
+
+    taskDiv.addEventListener("click", function(event) {
+        if (event.target !== deleteBtn) {
+            if (taskText.style.textDecoration === "line-through") {
+                taskText.style.textDecoration = "none";
+            } else {
+                taskText.style.textDecoration = "line-through";
+            }
+        }
+    });
+
+    saveTasks();
+}
+
+function saveTasks() {
+    let tasks = [];
+    div.querySelectorAll('.task').forEach(function(taskDiv) {
+        let taskText = taskDiv.querySelector('span').innerText;
+        tasks.push(taskText);
+    });
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    let tasks = JSON.parse(localStorage.getItem('tasks'));
+    if (tasks) {
+        tasks.forEach(function(task) {
+            addTask(task);
+        });
+    }
+}
+
+window.addEventListener('load', loadTasks);
+</script>
+</body>
+</html>
